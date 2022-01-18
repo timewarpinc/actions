@@ -59,7 +59,7 @@ jobs:
                 }
               }
             `;
-            const project_info = await github.graphql(getProject, { number: parseInt(project_id, 10), org: owner });
+            const project_info = await github.graphql(getProject, { number: parseInt(project_number, 10), org: owner });
             const project_id = project_info.organization.projectNext.id;
             
             return project_id;            
