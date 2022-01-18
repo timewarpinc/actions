@@ -17,11 +17,15 @@ on:
         required: true
       CLIENT_PEM:
         required: true
+    outputs:
+      project_id:
+        description: "Project node_id"
+        value: ${{ jobs.project-info.outputs.node_id }}
 jobs:
   project-info:
     runs-on: ubuntu-latest
     outputs:
-      project-id: ${{ steps.project-id.outputs.result }}
+      node_id: ${{ steps.project.outputs.result }}
     steps:
       - name: Generate token
         id: token
@@ -32,7 +36,7 @@ jobs:
 
       - name: Get Project info
         uses: actions/github-script@v5
-        id: project-id
+        id: project
         with:
           result-encoding: string
           github-token: ${{ steps.token.outputs.token }}
