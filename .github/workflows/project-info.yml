@@ -18,31 +18,24 @@ on:
       CLIENT_PEM:
         required: true
 jobs:
-  token:
+  project-info:
     runs-on: ubuntu-latest
     outputs:
-      token: ${{ steps.generate_token.outputs.token }}
+      project-id: ${{ steps.project-id.outputs.result }}
     steps:
       - name: Generate token
-        id: generate_token
+        id: token
         uses: tibdex/github-app-token@7ce9ffdcdeb2ba82b01b51d6584a6a85872336d4
         with:
           app_id: ${{ secrets.APP_ID }}
           private_key: ${{ secrets.CLIENT_PEM }}
-  project-info:
-    runs-on: ubuntu-latest
-    needs: token
-    outputs:
-      project-id: ${{ steps.project-id.outputs.result }}
-    steps:
-      - run: |
-         echo '${{ toJSON(needs) }}'
+
       - name: Get Project info
         uses: actions/github-script@v5
         id: project-id
         with:
           result-encoding: string
-          github-token: ${{ needs.token.outputs.token }}
+          github-token: ${{ steps.generate_token.outputs.token }}
           script: |
             console.log("CONTEXT: ", context);
             const project_number = context.payload.inputs.project_number;
