@@ -38,7 +38,7 @@ jobs:
         with:
           app_id: ${{ secrets.APP_ID }}
           private_key: ${{ secrets.CLIENT_PEM }}
-      - uses: timewarpinc/actions/.github/workflows/project-info.yml
+      - uses: timewarpinc/actions/.github/workflows/project-info.yml@main
         id: project
       - name: Assign issues to project
         uses: actions/github-script@v5
