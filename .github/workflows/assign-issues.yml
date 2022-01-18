@@ -29,8 +29,13 @@ on:
         required: true
 
 jobs:
+  project_info:
+    uses: timewarpinc/actions/.github/workflows/project-info.yml@main
+    with:
+      project_number: ${{  github.event.inputs }}
   assign-issues:
     runs-on: ubuntu-latest
+    needs: project_info
     steps:
       - name: Generate token
         id: token
@@ -38,14 +43,13 @@ jobs:
         with:
           app_id: ${{ secrets.APP_ID }}
           private_key: ${{ secrets.CLIENT_PEM }}
-      - uses: timewarpinc/actions/.github/workflows/project-info.yml@main
-        id: project
       - name: Assign issues to project
         uses: actions/github-script@v5
         with:
           github-token: ${{ steps.token.outputs.token }}
           script: |
-            const project = context.steps.project.node_id;
+            console.log("CONTEXT: ", context)
+            const project = context.needs.project_info.node_id;
             const owner = context.repo.owner;
             const repo = context.payload.inputs.repo || context.repo.repo;
             const state = context.payload.inputs.state;
