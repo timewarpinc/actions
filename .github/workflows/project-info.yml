@@ -1,0 +1,64 @@
+name: Project Info
+
+on:
+  workflow_call:
+    inputs:
+      project_number:
+        required: true
+        type: number
+    secrets:
+      APP_ID:
+        required: true
+      CLIENT_PEM:
+        required: true
+jobs:
+  token:
+    runs-on: ubuntu-latest
+    outputs:
+      token: ${{ steps.generate_token.outputs.token }}
+    steps:
+      - name: Generate token
+        id: generate_token
+        uses: tibdex/github-app-token@7ce9ffdcdeb2ba82b01b51d6584a6a85872336d4
+        with:
+          app_id: ${{ inputs.APP_ID }}
+          private_key: ${{ secrets.CLIENT_PEM }}
+  project-info:
+    runs-on: ubuntu-latest
+    needs: token
+    outputs:
+      project-id: ${{ steps.project-id.outputs.result }}
+    steps:
+      - name: Assign issues to project
+        uses: actions/github-script@v5
+        id: project-id
+        with:
+          result-encoding: string
+          github-token: ${{ needs.token.outputs.token }}
+          script: |
+            console.log("CONTEXT: ", context);
+            const project_number = context.inputs.project_number;
+            const owner = context.repo.owner;
+            
+            console.log({ project_number, owner });
+            
+            const getProject = `
+              query($org: String!, $number: Int!) {
+                organization(login: $org){
+                  projectNext(number: $number) {
+                    id
+                    fields(first:20) {
+                      nodes {
+                        id
+                        name
+                        settings
+                      }
+                    }
+                  }
+                }
+              }
+            `;
+            const project_info = await github.graphql(getProject, { number: parseInt(project_id, 10), org: owner });
+            const project_id = project_info.organization.projectNext.id;
+            
+            return project_id;            
