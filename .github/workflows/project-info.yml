@@ -35,7 +35,9 @@ jobs:
     outputs:
       project-id: ${{ steps.project-id.outputs.result }}
     steps:
-      - name: Assign issues to project
+      - run: |
+         echo '${{ toJSON(needs) }}'
+      - name: Get Project info
         uses: actions/github-script@v5
         id: project-id
         with:
