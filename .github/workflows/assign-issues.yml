@@ -1,0 +1,79 @@
+name: Assign all issues to a project
+
+on:
+  workflow_dispatch:
+    inputs:
+      state:
+        type: string
+        required: true
+        default: open
+      repo:
+        type: string
+        required: true
+      project_number:
+        type: number
+        required: true
+
+  workflow_call:
+    inputs:
+      project_number:
+        required: true
+        type: number
+      repo:
+        type: string
+        required: true
+    secrets:
+      APP_ID:
+        required: true
+      CLIENT_PEM:
+        required: true
+
+jobs:
+  assign-issues:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate token
+        id: token
+        uses: tibdex/github-app-token@7ce9ffdcdeb2ba82b01b51d6584a6a85872336d4
+        with:
+          app_id: ${{ secrets.APP_ID }}
+          private_key: ${{ secrets.CLIENT_PEM }}
+      - uses: timewarpinc/actions/.github/workflows/project-info.yml
+        id: project
+      - name: Assign issues to project
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{ steps.token.outputs.token }}
+          script: |
+            const project = context.steps.project.node_id;
+            const owner = context.repo.owner;
+            const repo = context.payload.inputs.repo || context.repo.repo;
+            const state = context.payload.inputs.state;
+            
+            console.log({ project, owner, repo });
+            
+            const addToProject = `
+              mutation($project:ID!, $id:ID!) {
+                addProjectNextItem(input: {projectId: $project, contentId: $id}) {
+                  projectNextItem {
+                    id
+                  }
+                }
+              }
+            `;
+            
+            for await (const response of github.paginate.iterator(github.rest.issues.listForRepo, { owner, repo, state: state })) {
+              for (issue of response.data) {
+                console.log("ISSUE: ", issue);
+                const status = await github.graphql(addToProject, { project , id: issue.node_id });
+                console.log("STATUS: ", status);
+              }
+            }
+            
+             for await (const response of github.paginate.iterator(github.rest.pulls.list, { owner, repo, state: state })) {
+              for (pr of response.data) {
+                console.log("PR: ", pr);
+                const status = await github.graphql(addToProject, { project, id: pr.node_id });
+                console.log("STATUS: ", status);
+              }
+            }
