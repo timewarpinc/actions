@@ -35,7 +35,7 @@ jobs:
         id: project-id
         with:
           result-encoding: string
-          github-token: ${{ steps.generate_token.outputs.token }}
+          github-token: ${{ steps.token.outputs.token }}
           script: |
             console.log("CONTEXT: ", context);
             const project_number = context.payload.inputs.project_number;
