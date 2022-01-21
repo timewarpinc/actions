@@ -1,0 +1,55 @@
+name: 'Get Project Info'
+description: 'Get Project node_id from the project number'
+inputs:
+  project_number:
+    type: number
+    required: true
+secrets:
+   APP_ID:
+     required: false
+   CLIENT_PEM:
+     required: false
+outputs:
+  node_id:
+    description: "Project node_id"
+    value: ${{ steps.project-info.outputs.result }}
+runs:
+  using: "composite"
+  steps:
+  - name: Generate token
+    id: token
+    uses: tibdex/github-app-token@7ce9ffdcdeb2ba82b01b51d6584a6a85872336d4
+    with:
+      app_id: ${{ secrets.APP_ID }}
+      private_key: ${{ secrets.CLIENT_PEM }}
+
+  - name: Get Project info
+    uses: actions/github-script@v5
+    id: project-info
+    with:
+      result-encoding: string
+      github-token: ${{ steps.token.outputs.token }}
+      script: |
+        const project_number = context.payload.inputs.project_number;
+        const owner = context.repo.owner;
+
+        const getProject = `
+          query($org: String!, $number: Int!) {
+            organization(login: $org){
+              projectNext(number: $number) {
+                id
+                fields(first:20) {
+                  nodes {
+                    id
+                    name
+                    settings
+                  }
+                }
+              }
+            }
+          }
+        `;
+        const project_info = await github.graphql(getProject, { number: parseInt(project_number, 10), org: owner });
+        const project_id = project_info.organization.projectNext.id;
+
+        return project_id;            
