@@ -44,7 +44,7 @@ jobs:
         with:
           APP_ID: ${{ secrets.APP_ID }}
           CLIENT_PEM: ${{ secrets.CLIENT_PEM }}
-          project_number: ${{ github.event.inputs.project_number }}
+          project_number: ${{ (github.event.inputs || inputs).project_number }}
       - name: Assign Issue/PR to project
         uses: actions/github-script@v5
         with:
