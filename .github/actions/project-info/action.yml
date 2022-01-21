@@ -4,10 +4,10 @@ inputs:
   project_number:
     type: number
     required: true
-   APP_ID:
-     required: true
-   CLIENT_PEM:
-     required: true
+  APP_ID:
+    required: true
+  CLIENT_PEM:
+    required: true
 outputs:
   node_id:
     description: "Project node_id"
