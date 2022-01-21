@@ -53,7 +53,7 @@ jobs:
             const repo = context.payload.inputs.repo || context.repo.repo;
             const node_id = context.payload.inputs.node_id;
             console.log({${{ toJSON(steps) }})
-            const project = (${{ toJSON(steps.project_info.outputs.node_id) || "" }});
+            const project = (${{ toJSON(steps.project_info.outputs.node_id) }});
 
             const query = `
               mutation($project:ID!, $id:ID!) {
