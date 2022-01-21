@@ -38,7 +38,7 @@ jobs:
         with:
           repository: timewarpinc/actions
       - name: Get Project Info
-        id: project-info
+        id: project_info
         uses: ./.github/actions/project-info
         with:
           APP_ID: ${{ secrets.APP_ID }}
@@ -47,7 +47,7 @@ jobs:
       - name: Assign Issue/PR to project
         uses: actions/github-script@v5
         with:
-          github-token: ${{ steps.project-info.outputs.token }}
+          github-token: ${{ steps.project_info.outputs.token }}
           script: |
             const owner = context.repo.owner;
             const repo = context.payload.inputs.repo || context.repo.repo;
