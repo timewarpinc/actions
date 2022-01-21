@@ -51,7 +51,7 @@ jobs:
           github-token: ${{ steps.project_info.outputs.token }}
           script: |
             const owner = context.repo.owner;
-            const repo = context.payload.inputs.repo || context.repo.repo;
+            const repo = (context.payload.inputs || context.repo).repo || ${{ toJSON(inputs.repo) }};
             const node_id = ${{ toJSON(inputs.node_id) }};
             const project = ${{ toJSON(steps.project_info.outputs.node_id) }};
 
