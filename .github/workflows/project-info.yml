@@ -25,42 +25,12 @@ jobs:
   project-info:
     runs-on: ubuntu-latest
     outputs:
-      node_id: ${{ steps.project.outputs.result }}
+      node_id: ${{ steps.project-info.outputs.node_id }}
     steps:
-      - name: Generate token
-        id: token
-        uses: tibdex/github-app-token@7ce9ffdcdeb2ba82b01b51d6584a6a85872336d4
+      - name: Get Project Info
+        id: project-info
+        uses: ./.github/actions/project-info
         with:
-          app_id: ${{ secrets.APP_ID }}
-          private_key: ${{ secrets.CLIENT_PEM }}
-
-      - name: Get Project info
-        uses: actions/github-script@v5
-        id: project
-        with:
-          result-encoding: string
-          github-token: ${{ steps.token.outputs.token }}
-          script: |
-            const project_number = context.payload.inputs.project_number;
-            const owner = context.repo.owner;
-            
-            const getProject = `
-              query($org: String!, $number: Int!) {
-                organization(login: $org){
-                  projectNext(number: $number) {
-                    id
-                    fields(first:20) {
-                      nodes {
-                        id
-                        name
-                        settings
-                      }
-                    }
-                  }
-                }
-              }
-            `;
-            const project_info = await github.graphql(getProject, { number: parseInt(project_number, 10), org: owner });
-            const project_id = project_info.organization.projectNext.id;
-            
-            return project_id;            
+          APP_ID: ${{ secrets.APP_ID }}
+          CLIENT_PEM: ${{ secrets.CLIENT_PEM }}
+          project_number: ${{ github.event.inputs.project_number }}
