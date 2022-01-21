@@ -34,7 +34,6 @@ jobs:
   add-to-project:
     runs-on: ubuntu-latest
     steps:
-      - run: echo '${{ toJSON( github ) }}'
       - uses: actions/checkout@v2
         with:
           repository: timewarpinc/actions
