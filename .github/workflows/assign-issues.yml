@@ -47,8 +47,9 @@ jobs:
         with:
           github-token: ${{ steps.token.outputs.token }}
           script: |
+            context.needs = (${{ toJSON(needs) }});
             console.log("CONTEXT: ", context)
-            const project = context.needs.project_info.node_id;
+            const project = needs.project_info.node_id;
             const owner = context.repo.owner;
             const repo = context.payload.inputs.repo || context.repo.repo;
             const state = context.payload.inputs.state;
