@@ -35,6 +35,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          repository: timewarpinc/actions
       - name: Get Project Info
         id: project-info
         uses: ./.github/actions/project-info
