@@ -12,6 +12,11 @@ on:
       project_number:
         required: true
         type: string
+    secrets:
+       APP_ID:
+         required: false
+       CLIENT_PEM:
+         required: false
     outputs:
       project_id:
         description: "Project node_id"
