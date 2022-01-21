@@ -31,7 +31,7 @@ on:
         required: true
 
 jobs:
-  assign-issues:
+  add-to-project:
     runs-on: ubuntu-latest
     steps:
       - run: echo '${{ toJSON( github ) }}'
