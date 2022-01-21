@@ -12,6 +12,10 @@ outputs:
   node_id:
     description: "Project node_id"
     value: ${{ steps.project-info.outputs.result }}
+  token:
+    description: "GitHub Token"
+    value: ${{ steps.token.outputs.token }}
+
 runs:
   using: "composite"
   steps:
