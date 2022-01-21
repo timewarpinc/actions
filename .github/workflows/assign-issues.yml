@@ -27,7 +27,7 @@ jobs:
   project_info:
     uses: timewarpinc/actions/.github/workflows/project-info.yml@main
     with:
-      project_number: ${{  github.event.inputs }}
+      project_number: ${{  github.event.inputs.project_number }}
   assign-issues:
     runs-on: ubuntu-latest
     needs: project_info
