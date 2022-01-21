@@ -47,14 +47,11 @@ jobs:
         with:
           github-token: ${{ steps.token.outputs.token }}
           script: |
-            console.log("CONTEXT: ", context, " OUTPUTS: ", ${{ toJSON(needs.project_info.outputs) }})
             const project = ${{ toJSON(needs.project_info.outputs.project_id) }};
             const owner = context.repo.owner;
             const repo = context.payload.inputs.repo || context.repo.repo;
             const state = context.payload.inputs.state;
-            
-            console.log({ project, owner, repo });
-            
+                        
             const addToProject = `
               mutation($project:ID!, $id:ID!) {
                 addProjectNextItem(input: {projectId: $project, contentId: $id}) {
@@ -67,7 +64,6 @@ jobs:
             
             for await (const response of github.paginate.iterator(github.rest.issues.listForRepo, { owner, repo, state: state })) {
               for (issue of response.data) {
-                console.log("ISSUE: ", issue);
                 const status = await github.graphql(addToProject, { project , id: issue.node_id });
                 console.log("STATUS: ", status);
               }
@@ -75,7 +71,6 @@ jobs:
             
              for await (const response of github.paginate.iterator(github.rest.pulls.list, { owner, repo, state: state })) {
               for (pr of response.data) {
-                console.log("PR: ", pr);
                 const status = await github.graphql(addToProject, { project, id: pr.node_id });
                 console.log("STATUS: ", status);
               }
