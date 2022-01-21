@@ -27,6 +27,7 @@ jobs:
     outputs:
       node_id: ${{ steps.project-info.outputs.node_id }}
     steps:
+      - uses: actions/checkout@v2
       - name: Get Project Info
         id: project-info
         uses: ./.github/actions/project-info
