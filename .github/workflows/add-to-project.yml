@@ -1,0 +1,72 @@
+name: Add Issue/PR to the project
+
+on:
+  workflow_dispatch:
+    inputs:
+      node_id:
+        type: string
+        required: true
+      repo:
+        type: string
+        required: true
+      project_number:
+        type: number
+        required: true
+
+  workflow_call:
+    inputs:
+      node_id:
+        required: true
+        type: string
+      repo:
+        type: string
+        required: true
+      project_number:
+        type: number
+        required: true
+
+jobs:
+  project_info:
+    uses: timewarpinc/actions/.github/workflows/project-info.yml@main
+    with:
+      project_number: ${{ github.event.inputs.project_number }}
+    secrets:
+      APP_ID: ${{ secrets.APP_ID }}
+      CLIENT_PEM: ${{ secrets.CLIENT_PEM }}
+
+  assign-issues:
+    runs-on: ubuntu-latest
+    needs: project_info
+    steps:
+      - name: Generate token
+        id: token
+        uses: tibdex/github-app-token@7ce9ffdcdeb2ba82b01b51d6584a6a85872336d4
+        with:
+          app_id: ${{ secrets.APP_ID }}
+          private_key: ${{ secrets.CLIENT_PEM }}
+      - name: Assign Issue/PR to project
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{ steps.token.outputs.token }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.payload.inputs.repo || context.repo.repo;
+            const node_id = context.payload.inputs.node_id;
+            const project = ${{ toJSON(needs.project_info.outputs.project_id) }};
+
+            const query = `
+              mutation($project:ID!, $id:ID!) {
+                addProjectNextItem(input: {projectId: $project, contentId: $id}) {
+                  projectNextItem {
+                    id
+                  }
+                }
+              }
+            `;
+            
+            const variables = {
+              project: project,
+              id: node_id,
+            }
+            const result = await github.graphql(query, variables)
+            console.log(result)
