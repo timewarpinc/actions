@@ -28,6 +28,10 @@ jobs:
     uses: timewarpinc/actions/.github/workflows/project-info.yml@main
     with:
       project_number: ${{  github.event.inputs.project_number }}
+    secrets:
+      APP_ID: ${{ secrets.APP_ID }}
+      CLIENT_PEM: ${{ secrets.CLIENT_PEM }}
+
   assign-issues:
     runs-on: ubuntu-latest
     needs: project_info
