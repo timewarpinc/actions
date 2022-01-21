@@ -14,6 +14,11 @@ on:
         required: true
 
   workflow_call:
+    secrets:
+       APP_ID:
+         required: false
+       CLIENT_PEM:
+         required: false
     inputs:
       node_id:
         required: true
