@@ -1,0 +1,52 @@
+name: 'Add to Project'
+description: 'Add node_id to the Project'
+inputs:
+  node_id:
+    required: true
+    type: string
+  repo:
+    type: string
+    required: true
+  project_number:
+    type: number
+    required: true
+  APP_ID:
+    required: true
+  CLIENT_PEM:
+    required: true
+runs:
+  using: "composite"
+  steps:
+  - name: Get Project Info
+    id: project-info
+    uses: ./.github/actions/project-info
+    with:
+      APP_ID: ${{ secrets.APP_ID }}
+      CLIENT_PEM: ${{ secrets.CLIENT_PEM }}
+      project_number: ${{ github.event.inputs.project_number }}
+  - name: Assign Issue/PR to project
+    uses: actions/github-script@v5
+    with:
+      github-token: ${{ steps.project-info.outputs.token }}
+      script: |
+        console.log("CONTEXT: ", context)
+        const owner = context.repo.owner;
+        const repo = context.payload.inputs.repo || context.repo.repo;
+        const node_id = ${{ toJSON(inputs.node_id) }};
+        const project = ${{ toJSON(steps.project-info.outputs.node_id) }};
+        const query = `
+          mutation($project:ID!, $id:ID!) {
+            addProjectNextItem(input: {projectId: $project, contentId: $id}) {
+              projectNextItem {
+                id
+              }
+            }
+          }
+        `;
+
+        const variables = {
+          project: project,
+          id: node_id,
+        }
+        const result = await github.graphql(query, variables)
+        console.log(result)
