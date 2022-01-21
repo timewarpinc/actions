@@ -41,11 +41,8 @@ jobs:
           result-encoding: string
           github-token: ${{ steps.token.outputs.token }}
           script: |
-            console.log("CONTEXT: ", context);
             const project_number = context.payload.inputs.project_number;
             const owner = context.repo.owner;
-            
-            console.log({ project_number, owner });
             
             const getProject = `
               query($org: String!, $number: Int!) {
