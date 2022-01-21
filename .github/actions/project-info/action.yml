@@ -33,7 +33,7 @@ runs:
       result-encoding: string
       github-token: ${{ steps.token.outputs.token }}
       script: |
-        const project_number = ${{ inputs.project_number }};
+        const project_number = (${{ toJSON(inputs.project_number) }});
         const owner = context.repo.owner;
 
         const getProject = `
