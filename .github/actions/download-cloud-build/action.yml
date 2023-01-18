@@ -1,0 +1,67 @@
+name: 'Download Unity Cloud Build Action'
+description: 'Download Unity Cloud Build'
+runs:
+  using: composite
+  steps:
+    - run: echo Download ref:${{ inputs.ref }} target:${{inputs.target}} projectID:${{inputs.projectID}} orgID:${{inputs.orgID}}
+      shell: bash
+    - run: |
+        curl --version
+        
+        wait=yes
+        while [[ $wait != 'no' ]]; do
+          wait ${{inputs.waitTime }}
+          curl https://build-api.cloud.unity3d.com/api/v1/orgs/${{ inputs.orgID }}/projects/${{ inputs.projectID }}/buildtargets/${{ inputs.target }}/builds/${{ inputs.buildID }} \
+          --fail-with-body \
+          --user "${{inputs.apiKey}}:" \
+          --header "Content-Type: application/json" \
+          --write-out '%{json}' --output response.json
+          EXIT=$?
+          BUILD_STATUS=$(cat response.json | jq .buildStatus)
+          
+          case $BUILD_STATUS in
+            success | cancelled | failure)
+              wait=no;
+              ;;
+
+            *)
+              wait=yes;
+              ;;
+          esac;
+        done
+        set +e
+        curl https://build-api.cloud.unity3d.com/api/v1/orgs/${{ inputs.orgID }}/projects/${{ inputs.projectID }}/buildtargets/${{ inputs.target }}/builds/${{ inputs.buildID }} \
+          --fail-with-body \
+          --user "${{inputs.apiKey}}:" \
+          --header "Content-Type: application/json" \
+          --write-out '%{json}' --output response.json
+        EXIT=$?
+        set -e
+        JSON=$(cat ./response.json)
+        echo "::set-output name=response::${JSON//'%'/'%25'}"
+        echo "::set-output name=exit::${EXIT}"
+
+        exit ${EXIT}
+      shell: bash
+      id: wait
+      name: "Wait for ${{ inputs.target }}"
+
+inputs:
+  target:
+    description: "Build target"
+    required: true
+  projectID:
+    description: "Project ID"
+    required: true
+  orgID:
+    description: "Organization ID"
+    required: true
+  buildID:
+    description: "Build ID"
+    required: true
+  apiKey:
+    required: true
+    description: "Unity Cloud Build API Key"
+  waitTime:
+    default: "10"
+    description: "How many seconds to wait between checking the status."

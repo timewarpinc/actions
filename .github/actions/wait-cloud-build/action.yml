@@ -1,0 +1,33 @@
+name: 'Wait Unity Cloud Build Action'
+description: 'Wait Unity Cloud Build'
+runs:
+  using: node16
+  main: dist/index.js
+
+outputs:
+  status:
+    description: "Build Status"
+  build:
+    description: "Build JSON"
+  download_url:
+    description: "Build download URL"
+
+inputs:
+  target:
+    description: "Build target"
+    required: true
+  projectID:
+    description: "Project ID"
+    required: true
+  orgID:
+    description: "Organization ID"
+    required: true
+  buildID:
+    description: "Build ID"
+    required: true
+  apiKey:
+    required: true
+    description: "Unity Cloud Build API Key"
+  waitTime:
+    default: "10"
+    description: "How many seconds to wait between checking the status."

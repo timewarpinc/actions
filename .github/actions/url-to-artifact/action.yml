@@ -1,0 +1,30 @@
+name: 'Download URL and store it as artifact'
+description: 'Download something and upload it as an artifact'
+runs:
+  using: composite
+  steps:
+    - run: |
+        wget --output-document "${{ inputs.artifactFile }}"  "${{ inputs.URL }}"
+      shell: bash
+      name: "Download ${{ inputs.artifactFile }}"
+    - uses: actions/upload-artifact@v3
+      with:
+        # name: ${{ inputs.artifactName }}
+        # path: ${{ inputs.artifactFile }}
+        name: release
+        path: release.zip
+
+inputs:
+  URL:
+    description: 'URL'
+    required: true
+
+  artifactName:
+    description: "Name of the artifact"
+    required: true
+    default: "release"
+
+  artifactFile:
+    description: "Name of the file"
+    required: true
+    default: "release.zip"

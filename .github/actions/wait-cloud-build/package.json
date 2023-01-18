@@ -1,0 +1,18 @@
+{
+  "name": "wait-cloud-build",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "@actions/core": "^1.10.0",
+    "@actions/github": "^5.1.1",
+    "@actions/http-client": "^2.0.1"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.34.0"
+  },
+  "scripts": {
+    "build": "ncc build src/index.js -o dist"
+  }
+}

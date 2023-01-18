@@ -1,0 +1,53 @@
+name: 'Schedule Unity Cloud Build Action'
+description: 'Schedules Unity Cloud Build'
+runs:
+  using: composite
+  steps:
+    - run: echo Build ref:${{ inputs.ref }} target:${{inputs.target}} projectID:${{inputs.projectID}} orgID:${{inputs.orgID}}
+      shell: bash
+    - run: |
+        curl --version
+        set +e
+        curl https://build-api.cloud.unity3d.com/api/v1/orgs/${{ inputs.orgID }}/projects/${{ inputs.projectID }}/buildtargets/${{ inputs.target }}/builds \
+          --fail-with-body \
+          --user "${{inputs.apiKey}}:" \
+          --data '{"clean": false, "commit": "${{inputs.ref}}" }' \
+          --header "Content-Type: application/json" \
+          --write-out '%{json}' --output response.json
+        EXIT=$?
+        set -e
+        echo
+        JSON=$(cat ./response.json)
+        echo "::set-output name=builds::${JSON//'%'/'%25'}"
+        echo "::set-output name=exit::${EXIT}"
+        echo "::set-output name=target::${{ inputs.target }}"
+    
+        exit ${EXIT}
+      shell: bash
+      id: schedule
+      name: "Schedule ${{ inputs.target }}"
+outputs:
+  buildTarget:
+    description: "Build Target"
+    value: ${{ steps.schedule.outputs.target }}
+  buildIDs:
+    description: "Build IDs that got scheduled"
+    value: ${{ toJSON(fromJSON(steps.schedule.outputs.builds).*.build) }}
+
+inputs:
+  ref:
+    description: 'Git ref'
+    required: true
+    default: 'main'
+  target:
+    description: "Build target"
+    required: true
+  projectID:
+    description: "Project ID"
+    required: true
+  orgID:
+    description: "Organization ID"
+    required: true
+  apiKey:
+    required: true
+    description: "Unity Cloud Build API Key"
